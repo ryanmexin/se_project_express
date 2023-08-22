@@ -3,7 +3,7 @@ class ValidationError extends Error {
     super(message);
     this.name = "ValidationError";
     this.statusCode = 400;
-    this.message = "Invalid User";
+    this.message = "Validation Error";
   }
 }
 

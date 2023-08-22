@@ -5,7 +5,7 @@ const like = require('./likes')
 
 router.use('/items', clothingItem);
 
-router.use('/user', user)
+router.use('/users', user)
 
 router.use('/items', like)
 
