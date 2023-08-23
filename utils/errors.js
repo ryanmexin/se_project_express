@@ -3,7 +3,7 @@ class ValidationError extends Error {
     super(message);
     this.name = "ValidationError";
     this.statusCode = 400;
-    this.message = "Validation Error";
+    this.message = ({message: "Validation Error"});
   }
 }
 
@@ -12,7 +12,7 @@ class NotFoundError extends Error {
     super(message);
     this.name = "NotFoundError";
     this.statusCode = 404;
-    this.message = "Not Found";
+    this.message = ({message: "Not Found"});
   }
 }
 
@@ -21,7 +21,7 @@ class ServerError extends Error {
     super(message);
     this.name = "ServerError";
     this.statusCode = 500;
-    this.message = "Server Error";
+    this.message = ({message: "Server Error"});
   }
 }
 

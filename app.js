@@ -12,13 +12,15 @@ mongoose.connect(
 
 const routes = require("./routes");
 app.use(express.json());
-app.use(routes);
+
 app.use((req, res, next) => {
   req.user = {
     _id: "64e52622c42f04be1166d1b4", // paste the _id of the test user created in the previous step
   };
   next();
 });
+app.use(routes);
+
 
 app.listen(PORT, () => {
   // if everything is working, the console will show which port the application is listening

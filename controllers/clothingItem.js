@@ -65,10 +65,11 @@ const deleteItem = (req, res) => {
 
   ClothingItem.findByIdAndDelete(itemId)
     .orFail()
-    .then((item) =>
+    .then((item) => {
       res
         .status(204)
-        .send({})
+        .send({});
+})
         .catch((e) => {
           if (e.name && e.name === "NotFoundError") {
             const notFoundError = new NotFoundError();
@@ -76,8 +77,8 @@ const deleteItem = (req, res) => {
               .status(notFoundError.statusCode)
               .send(notFoundError.message);
           }
-        }),
-    );
+        });
+
 };
 
 module.exports = {
