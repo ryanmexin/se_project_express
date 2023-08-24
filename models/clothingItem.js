@@ -5,6 +5,8 @@ const clothingItem = new mongoose.Schema({
   name: {
     type: String,
     required: true,
+    minLength: 2,
+    maxLength: 30,
   },
   weather: {
     type: String,
@@ -25,7 +27,7 @@ const clothingItem = new mongoose.Schema({
   },
   likes: {
     type: [{ type: mongoose.Schema.Types.ObjectId, ref: "user" }],
-    default: likes = []
+    default: (likes = []),
   },
 
   createdAt: {

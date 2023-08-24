@@ -24,5 +24,13 @@ class ServerError extends Error {
     this.message = ({message: "Server Error"});
   }
 }
+class CastError extends Error {
+  constructor(message) {
+    super(message);
+    this.name = "CastError";
+    this.statusCode = 400;
+    this.message = "Cast Error";
+  }
+}
 
-module.exports = { ValidationError, NotFoundError, ServerError };
+module.exports = { ValidationError, NotFoundError, ServerError, CastError };

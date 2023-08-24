@@ -1,4 +1,5 @@
 const ClothingItem = require('../models/clothingItem');
+const { ValidationError, CastError } = require("../utils/errors");
 
 module.exports.likeItem = (req, res) => ClothingItem.findByIdAndUpdate(
   req.params.itemId,
@@ -6,10 +7,22 @@ module.exports.likeItem = (req, res) => ClothingItem.findByIdAndUpdate(
   { new: true },
 )
 
-.then((item) => {
-  res.status(200).send({ data: item });
-})
-.catch(() => res.status(500).send({ message: "like Error" }));
+.then((items) => res.status(200).send(items))
+.catch((e) => {
+  console.log(e);
+  if (e.name && e.name === "ValidationError") {
+    const validationError = new ValidationError();
+    return res
+      .status(validationError.statusCode)
+      .send({ message: validationError.message });
+  } else if (e.name && e.name === "CastError") {
+    const castError = new CastError();
+    return res
+      .status(castError.statusCode)
+      .send({ message: castError.message });
+  }
+});
+
 
 
 module.exports.dislikeItem = (req, res) => ClothingItem.findByIdAndUpdate(
@@ -17,5 +30,10 @@ module.exports.dislikeItem = (req, res) => ClothingItem.findByIdAndUpdate(
   { $pull: { likes: req.user._id } }, // remove _id from the array
   { new: true },
 )
-.then((item) => res.send({ data: item }))
+.then((item) => {
+  if (!item) {
+    return res.status(400).send({ message: "Item not found" });
+  }
+  res.send({ data: item });
+})
 .catch(() => res.status(500).send({ message: "dislike Error" }));
