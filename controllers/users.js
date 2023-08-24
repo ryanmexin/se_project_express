@@ -18,7 +18,9 @@ const getUser = (req,res) => {
   const {userId} = req.params;
   const {avatar} = req.body;
 
-  User.findById(userId, {$set: {avatar}}).orFail().then((item) => res.status(200).send({data:item})).catch((e) => {
+  User.findById(userId, {set: {avatar}})
+
+  .then((item) => res.status(200).send({data:item})).catch((e) => {
     console.log(e);
     if(e.name && e.name === 'NotFoundError'){
       console.log('throwing a NotFoundError');
