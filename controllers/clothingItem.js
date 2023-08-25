@@ -54,7 +54,7 @@ const updateItem = (req, res) => {
     .catch((e) => {
       if (e.name && e.name === "NotFoundError") {
         const notFoundError = new NotFoundError();
-        return res.status(notFoundError.statusCode).send(notFoundErrormessage);
+        return res.status(notFoundError.statusCode).send(notFoundError.message);
       }
     });
 };
@@ -68,7 +68,7 @@ const deleteItem = (req, res) => {
     const castError = new CastError();
     return res
       .status(castError.statusCode)
-      .send({ message: castError.message });
+      .send(castError.message);
   })
     .then((item) => {
       res

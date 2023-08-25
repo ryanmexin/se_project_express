@@ -3,15 +3,14 @@ const { ValidationError, CastError, NotFoundError } = require("../utils/errors")
 
 module.exports.likeItem = (req, res) => ClothingItem.findByIdAndUpdate(
   req.params.itemId,
-  { $addToSet: { likes: req.user._id } }, // add an _id to the array if it's not there
+  { $addToSet: { likes: req.user._id } }, // add _id to the array if it's not there
   { new: true },
 )
 
 .orFail(() => {
-  const castError = new CastError();
-    return res
-      .status(castError.statusCode)
-      .send({ message: castError.message }); // Remember to throw an error so .catch handles it instead of .then
+  const error = new Error("No card found with that id");
+  error.statusCode = 404;
+  throw error; // Remember to throw an error so .catch handles it instead of .then
 })
 .then((items) => res.status(200).send(items))
 .catch((e) => {
@@ -25,7 +24,7 @@ module.exports.likeItem = (req, res) => ClothingItem.findByIdAndUpdate(
     const validationError = new ValidationError();
     return res
       .status(validationError.statusCode)
-      .send({ message: validationError.message });
+      .send(validationError.message);
   }
 });
 
@@ -49,6 +48,6 @@ module.exports.dislikeItem = (req, res) => ClothingItem.findByIdAndUpdate(
     const validationError = new ValidationError();
     return res
       .status(validationError.statusCode)
-      .send({ message: validationError.message });
+      .send(validationError.message);
   }
 });

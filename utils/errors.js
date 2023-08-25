@@ -29,7 +29,7 @@ class CastError extends Error {
     super(message);
     this.name = "CastError";
     this.statusCode = 400;
-    this.message = "Cast Error";
+    this.message = ({message: "Cast Error"});
   }
 }
 
