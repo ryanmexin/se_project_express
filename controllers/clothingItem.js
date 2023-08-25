@@ -13,7 +13,7 @@ const createItem = (req, res) => {
     .then((item) => {
       console.log(item);
 
-      res.send({ data: item });
+      return res.send({ data: item });
     })
     .catch((e) => {
       console.log(e);
@@ -65,10 +65,10 @@ const deleteItem = (req, res) => {
 
   ClothingItem.findByIdAndDelete(itemId)
   .orFail(() => {
-    const castError = new CastError();
+    const notFoundError = new NotFoundError();
     return res
-      .status(castError.statusCode)
-      .send(castError.message);
+      .status(notFoundError.statusCode)
+      .send(notFoundError.message);
   })
     .then((item) => {
       res

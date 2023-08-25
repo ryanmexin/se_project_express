@@ -6,20 +6,20 @@ module.exports.likeItem = (req, res) => ClothingItem.findByIdAndUpdate(
   { $addToSet: { likes: req.user._id } }, // add _id to the array if it's not there
   { new: true },
 )
-
-.orFail(() => {
-  const error = new Error("No card found with that id");
-  error.statusCode = 404;
-  throw error; // Remember to throw an error so .catch handles it instead of .then
+  .orFail(() => {
+    const notFoundError = new NotFoundError();
+    return res
+      .status(notFoundError.statusCode)
+      .send(notFoundError.message);
 })
 .then((items) => res.status(200).send(items))
 .catch((e) => {
   console.log(e);
-  if (e.name && e.name === "CastError") {
-    const castError = new CastError();
+  if (e.name && e.name === "NotFoundError") {
+    const notFoundError = new NotFoundError();
     return res
-      .status(castError.statusCode)
-      .send({ message: castError.message });
+      .status(notFoundError.statusCode)
+      .send({ message: notFoundError.message });
   } else if (e.name && e.name === "ValidationError") {
     const validationError = new ValidationError();
     return res

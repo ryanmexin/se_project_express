@@ -20,8 +20,8 @@ const getUser = (req,res) => {
 
   User.findById(userId)
 .orFail(() => {
-  const castError = new CastError();
-  return res.status(castError.statusCode).send(castError.message)
+  const notFoundError = new NotFoundError();
+  return res.status(notFoundError.statusCode).send(notFoundError.message)
 })
   .then((item) => res.status(200).send({data:item})).catch((e) => {
     console.log(e);
