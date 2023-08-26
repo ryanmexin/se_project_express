@@ -35,12 +35,11 @@ const getItems = (req, res) => {
   ClothingItem.find({})
     .then((items) => res.status(200).send(items))
     .catch((e) => {
-      if (e.name && e.name === "ValidationError") {
-        const validationError = new ValidationError();
-        return res
-          .status(validationError.statusCode)
-          .send(validationError.message);
-      }
+      console.log(e);
+      const serverError = new ServerError();
+      return res
+        .status(serverError.statusCode)
+        .send(serverError.message);
     });
 };
 
@@ -64,26 +63,38 @@ const deleteItem = (req, res) => {
   console.log(itemId);
 
   ClothingItem.findByIdAndDelete(itemId)
-  .orFail(() => {
-    const notFoundError = new NotFoundError();
-    return res
-      .status(notFoundError.statusCode)
-      .send(notFoundError.message);
-  })
-    .then((item) => {
+    .orFail(() => {
+      const notFoundError = new NotFoundError();
+      return res
+        .status(notFoundError.statusCode)
+        .send({ message: notFoundError.message });
+    })
+    .then(() =>
       res
-        .status(204)
-        .send({});
-})
+        .status(200)
+        .send({ message: "item deleted" })
         .catch((e) => {
+          if (e.name === "ServerError") {
+            const serverError = new ServerError();
+            return res
+              .status(serverError.statusCode)
+              .send({ message: serverError.message });
+          }
           if (e.name && e.name === "NotFoundError") {
             const notFoundError = new NotFoundError();
             return res
               .status(notFoundError.statusCode)
-              .send(notFoundError.message);
+              .send({ message: notFoundError.message });
           }
-        });
-
+          if (e.name && e.name === "CastError") {
+            const castError = new CastError();
+            return res
+              .status(castError.statusCode)
+              .send({ message: castError.message });
+          }
+          return;
+        }),
+    );
 };
 
 module.exports = {

@@ -14,7 +14,7 @@ router.get("/", getItems);
 
 //Update
 
-router.put('/:itemId', updateItem)
+
 
 //Delete
 
