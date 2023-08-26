@@ -67,7 +67,7 @@ const deleteItem = (req, res) => {
       const notFoundError = new NotFoundError();
       return res
         .status(notFoundError.statusCode)
-        .send({ message: notFoundError.message });
+        .send( notFoundError.message);
     })
     .then(() =>
       res
@@ -78,7 +78,7 @@ const deleteItem = (req, res) => {
             const serverError = new ServerError();
             return res
               .status(serverError.statusCode)
-              .send({ message: serverError.message });
+              .send(serverError.message );
           }
           if (e.name && e.name === "NotFoundError") {
             const notFoundError = new NotFoundError();
@@ -90,7 +90,7 @@ const deleteItem = (req, res) => {
             const castError = new CastError();
             return res
               .status(castError.statusCode)
-              .send({ message: castError.message });
+              .send(castError.message);
           }
           return;
         }),
