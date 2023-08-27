@@ -1,5 +1,8 @@
 const ClothingItem = require("../models/clothingItem");
-const { ValidationError, NotFoundError,CastError } = require("../utils/errors");
+const { ValidationError } = require("../utils/errors/ValidationError");
+const { NotFoundError } = require("../utils/errors/NotFoundError");
+const { CastError } = require("../utils/errors/CastError");
+const { ServerError } = require("../utils/errors/ServerError");
 
 const createItem = (req, res) => {
   //console.log(req);
@@ -12,21 +15,21 @@ const createItem = (req, res) => {
   ClothingItem.create({ name, weather, imageUrl, owner: req.user._id })
     .then((item) => {
       console.log(item);
-
-      return res.send({ data: item });
+      console.log(req.user._id);
+      res.send({ data: item });
     })
     .catch((e) => {
       console.log(e);
-      if (e.name && e.name === "NotFoundError") {
-        console.log("NotFoundError");
-        const notFoundError = new NotFoundError();
-        return res.status(notFoundError.statusCode).send(notFoundError.message);
-      } else if (e.name === "ValidationError") {
+      if (e.name === "ValidationError") {
         const validationError = new ValidationError();
         return res
           .status(validationError.statusCode)
           .send(validationError.message);
       }
+      const serverError = new ServerError();
+      return res
+        .status(serverError.statusCode)
+        .send(serverError.message);
     });
 };
 
@@ -43,20 +46,6 @@ const getItems = (req, res) => {
     });
 };
 
-const updateItem = (req, res) => {
-  const { itemId } = req.params;
-  const { imageUrl } = req.body;
-
-  ClothingItem.findByIdAndUpdate(itemId, { $set: { imageUrl } })
-    .orFail()
-    .then((item) => res.status(200).send({ data: item }))
-    .catch((e) => {
-      if (e.name && e.name === "NotFoundError") {
-        const notFoundError = new NotFoundError();
-        return res.status(notFoundError.statusCode).send(notFoundError.message);
-      }
-    });
-};
 
 const deleteItem = (req, res) => {
   const { itemId } = req.params;
@@ -72,7 +61,7 @@ const deleteItem = (req, res) => {
     .then(() =>
       res
         .status(200)
-        .send({ message: "item deleted" })
+        .send({ message: "item has been deleted" })
         .catch((e) => {
           if (e.name === "ServerError") {
             const serverError = new ServerError();
@@ -84,7 +73,7 @@ const deleteItem = (req, res) => {
             const notFoundError = new NotFoundError();
             return res
               .status(notFoundError.statusCode)
-              .send({ message: notFoundError.message });
+              .send(notFoundError.message);
           }
           if (e.name && e.name === "CastError") {
             const castError = new CastError();
@@ -100,7 +89,6 @@ const deleteItem = (req, res) => {
 module.exports = {
   createItem,
   getItems,
-  updateItem,
   deleteItem,
 };
 

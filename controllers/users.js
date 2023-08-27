@@ -1,41 +1,51 @@
 const User = require('../models/user');
-const { ValidationError, NotFoundError, CastError } = require('../utils/errors');
+const { ValidationError } = require("../utils/errors/ValidationError");
+const { NotFoundError } = require("../utils/errors/NotFoundError");
+const { CastError } = require("../utils/errors/CastError");
+const { ServerError } = require("../utils/errors/ServerError");
 
 // get Users
 const getUsers = (req, res) => {
   console.log(req);
-  User.find({}).then((items) => res.status(200).send(items)).catch((e) => {
-    console.log(e);
-    if(e.name && e.name === 'ValidationError'){
-    const validationError = new ValidationError();
-    return res.status(validationError.statusCode).send(validationError.message);
-    }
-  })
+  User.find({})
+    .then((items) => res.status(200).send(items))
+    .catch((e) => {
+      console.log(e);
+      const serverError = new ServerError();
+      return res
+        .status(serverError.statusCode)
+        .send(serverError.message );
+    });
 };
+
 
 // get User
 const getUser = (req,res) => {
   const {userId} = req.params;
 
-
   User.findById(userId)
-.orFail(() => {
-  const notFoundError = new NotFoundError();
-  return res.status(notFoundError.statusCode).send(notFoundError.message)
-})
-  .then((item) => res.status(200).send({data:item})).catch((e) => {
+  .orFail(() => new NotFoundError())
+  .then((item) => res.status(200).send({ data: item }))
+  .catch((e) => {
     console.log(e);
-    if(e.name && e.name === 'NotFoundError'){
-      console.log('throwing a NotFoundError');
+    if (e.name && e.name === "CastError") {
+      const castError = new CastError();
+      return res
+        .status(castError.statusCode)
+        .send(castError.message);
+    }
+    if (e.name && e.name === "NotFoundError") {
+      console.log("throwing a NotFoundError");
       const notFoundError = new NotFoundError();
-      return res.status(notFoundError.statusCode).send(notFoundError.message);
-      } else {
-        console.log('throwing a validationError');
-        const validationError = new ValidationError();
-        console.log(validationError.message);
-      return res.status(validationError.statusCode).send(validationError.message);
-      }
-});
+      return res
+        .status(notFoundError.statusCode)
+        .send(notFoundError.message );
+    }
+      const serverError = new ServerError();
+      return res
+        .status(serverError.statusCode)
+        .send(serverError.message );
+  });
 };
 
 // create User
@@ -45,17 +55,26 @@ const createUser = (req,res) => {
 
   const { name, avatar } = req.body;
 
-  User.create({name, avatar}).then((item) => {
+  User.create({ name, avatar })
+  .then((item) => {
     console.log(item);
-    res.send({data: item})
-  }).catch((e) => {
-    if(e.name && e.name === 'ValidationError'){
+    res.send({ data: item });
+  })
+  .catch((e) => {
+    if (e.name && e.name === "ValidationError") {
       console.log(ValidationError);
       const validationError = new ValidationError();
-      return res.status(validationError.statusCode).send(validationError.message);
-      }
-  })
+      return res
+        .status(validationError.statusCode)
+        .send(validationError.message);
+    }
+    const serverError = new ServerError();
+    return res
+      .status(serverError.statusCode)
+      .send(serverError.message );
+  });
 };
+
 
 module.exports = {
   getUsers, getUser, createUser
