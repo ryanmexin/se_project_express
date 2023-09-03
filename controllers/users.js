@@ -1,81 +1,127 @@
-const User = require('../models/user');
+const User = require("../models/user");
+const bcrypt = require("bcryptjs");
 const { ValidationError } = require("../utils/errors/ValidationError");
 const { NotFoundError } = require("../utils/errors/NotFoundError");
 const { CastError } = require("../utils/errors/CastError");
 const { ServerError } = require("../utils/errors/ServerError");
-
-// get Users
-const getUsers = (req, res) => {
-  console.log(req);
-  User.find({})
-    .then((items) => res.status(200).send(items))
-    .catch((e) => {
-      console.log(e);
-      const serverError = new ServerError();
-      return res
-        .status(serverError.statusCode)
-        .send(serverError.message );
-    });
-};
-
-
-// get User
-const getUser = (req,res) => {
-  const {userId} = req.params;
-
-  User.findById(userId)
-  .orFail(() => new NotFoundError())
-  .then((item) => res.status(200).send({ data: item }))
-  .catch((e) => {
-    console.log(e);
-    if (e.name && e.name === "CastError") {
-      const castError = new CastError();
-      return res
-        .status(castError.statusCode)
-        .send(castError.message);
-    }
-    if (e.name && e.name === "NotFoundError") {
-      console.log("throwing a NotFoundError");
-      const notFoundError = new NotFoundError();
-      return res
-        .status(notFoundError.statusCode)
-        .send(notFoundError.message );
-    }
-      const serverError = new ServerError();
-      return res
-        .status(serverError.statusCode)
-        .send(serverError.message );
-  });
-};
+const { DuplicateEmailError } = require("../utils/errors/DuplicateEmailError");
+const { JWT_SECRET } = require("../utils/config");
+const { handle } = require("express/lib/application");
 
 // create User
-const createUser = (req,res) => {
+const createUser = (req, res) => {
   console.log(req);
   console.log(req.body);
 
-  const { name, avatar } = req.body;
+  const { name, avatar, email, password } = req.body;
 
-  User.create({ name, avatar })
-  .then((item) => {
-    console.log(item);
-    res.send({ data: item });
-  })
-  .catch((e) => {
-    if (e.name && e.name === "ValidationError") {
-      console.log(ValidationError);
-      const validationError = new ValidationError();
-      return res
-        .status(validationError.statusCode)
-        .send(validationError.message);
+  User.findOne({ email }).then((user) => {
+    if (!user) {
+      return Promise.reject(new Error("Incorrect email or password"));
     }
-    const serverError = new ServerError();
+    const duplicateEmailError = DuplicateEmailError();
     return res
-      .status(serverError.statusCode)
-      .send(serverError.message );
+      .status(duplicateEmailError.statusCode)
+      .send(duplicateEmailError.message);
   });
+
+  bcrypt.hash(req.body.password, 10).then((hash) =>
+    User.create({ name, avatar, email, password: hash })
+      .then((item) => {
+        console.log(item);
+        res.send({ data: item });
+      })
+      .catch((e) => {
+        if (e.name && e.name === "ValidationError") {
+          console.log(ValidationError);
+          const validationError = new ValidationError();
+          return res
+            .status(validationError.statusCode)
+            .send(validationError.message);
+        }
+        const serverError = new ServerError();
+        return res.status(serverError.statusCode).send(serverError.message);
+      }),
+  );
 };
 
+const getCurrentUser = (req, res) => {
+  const userId = req.user._id;
+  User.findById(userId)
+    .orFail()
+    .then((user) => {
+      res.status(200).send({ user });
+    })
+    .catch((err) => {
+      handleError(req, res, err);
+    });
+};
+
+const updateCurrentUser = (req, res) => {
+  const { name, avatar } = req.body;
+  User.findByIdAndUpdate(
+    req.user._id,
+    { name, avatar },
+    { new: true, runValidators: true },
+  )
+    .orFail()
+    .then((user) => {
+      return res.status(200).res.send({ data: user });
+    })
+    .catch((e) => {
+      console.log(e);
+      if (e.name && e.name === "CastError") {
+        const castError = new CastError();
+        return res.status(castError.statusCode).send(castError.message);
+      }
+      if (e.name && e.name === "NotFoundError") {
+        console.log("throwing a NotFoundError");
+        const notFoundError = new NotFoundError();
+        return res.status(notFoundError.statusCode).send(notFoundError.message);
+      }
+      const serverError = new ServerError();
+      return res.status(serverError.statusCode).send(serverError.message);
+    });
+};
+
+const login = (req, res) => {
+  const { email, password } = req.body;
+
+  User.findUserByCredentials(email, password)
+    .then((user) => {
+      if (email === req.body.email && password === req.body.password) {
+        const token = jwt
+          .sign({ _id: user._id }, JWT_SECRET, {
+            expiresIn: "7d",
+          })
+          .then((user) => {
+            res.status(201).send({ _id: user._id, email: user.email });
+          })
+          .catch((e) => {
+            if (e.name && e.name === "ValidationError") {
+              console.log(ValidationError);
+              const validationError = new ValidationError();
+              return res
+                .status(validationError.statusCode)
+                .send(validationError.message);
+            }
+            const serverError = new ServerError();
+            return res.status(serverError.statusCode).send(serverError.message);
+          });
+      }
+    })
+    .catch((e) => {
+      // otherwise, we get an error
+      const duplicateEmailError = DuplicateEmailError();
+      return res
+        .status(duplicateEmailError.statusCode)
+        .send(duplicateEmailError.message);
+    });
+};
 
 module.exports = {
-  getUsers, getUser, createUser
-}
+  createUser,
+  login,
+  getCurrentUser,
+  updateCurrentUser,
+};

@@ -3,6 +3,7 @@ const { ValidationError } = require("../utils/errors/ValidationError");
 const { NotFoundError } = require("../utils/errors/NotFoundError");
 const { CastError } = require("../utils/errors/CastError");
 const { ServerError } = require("../utils/errors/ServerError");
+const { Forbidden, ForbiddenError } = require("../utils/errors/Forbidden");
 
 const createItem = (req, res) => {
   // console.log(req);
@@ -51,7 +52,17 @@ const deleteItem = (req, res) => {
   const { itemId } = req.params;
   console.log(itemId);
 
-  ClothingItem.findByIdAndDelete(itemId)
+ClothingItem.findById(itemId)
+.orFail()
+.then((item) => {    ////Finds the ID and makes sure it matches the clothing Item
+  if (String(item.owner) !== req.user._id) {
+    const forbiddenError = new ForbiddenError();
+    return res
+      .status(forbiddenError.statusCode)
+      .send( forbiddenError.message);
+  }
+
+ return ClothingItem.findByIdAndDelete(itemId)
   .orFail(() => new NotFoundError())
   .then(() =>
     res
@@ -75,6 +86,7 @@ const deleteItem = (req, res) => {
         .status(serverError.statusCode)
         .send(serverError.message);
   });
+});
 }
 
 
