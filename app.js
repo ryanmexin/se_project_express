@@ -5,6 +5,7 @@ const { PORT = 3001 } = process.env;
 const app = express();
 
 const { login, createUser } = require("./controllers/users");
+const clothingItem = require("./routes/clothingItem");
 const auth = require("./middlewares/auth");
 const cors = require("cors");
 
@@ -21,19 +22,22 @@ const routes = require("./routes");
 
 
 app.use(express.json());
-app.use(routes);
+
 
 
 
 app.post('/signin', login);
 app.post('/signup', createUser);
+app.use('/items', clothingItem);
 
+app.use(auth);
 
+app.use(routes);
 
 app.use(cors());
 
-// authorization
-app.use(auth);
+
+
 
 app.listen(PORT, () => {
   // if everything is working, the console will show which port the application is listening
