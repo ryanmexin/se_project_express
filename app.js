@@ -20,7 +20,7 @@ mongoose.connect(
 const routes = require("./routes");
 
 
-
+app.use(cors());
 app.use(express.json());
 
 
@@ -28,13 +28,14 @@ app.use(express.json());
 
 app.post('/signin', login);
 app.post('/signup', createUser);
-app.use('/items', clothingItem);
+
 
 app.use(auth);
+app.use('/items', clothingItem);
 
 app.use(routes);
 
-app.use(cors());
+
 
 
 
