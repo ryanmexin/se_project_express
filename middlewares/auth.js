@@ -5,12 +5,12 @@ const { DuplicateEmailError } = require("../utils/errors/DuplicateEmailError");
 module.exports = (req, res, next) => {
   // getting authorization from the header
   const { authorization } = req.headers;
-
+ const duplicateEmailError = new DuplicateEmailError()
   // let's check the header exists and starts with 'Bearer '
   if (!authorization || !authorization.startsWith('Bearer ')) {
     return res
-      .status(DuplicateEmailError)
-      .send(DuplicateEmailError.message);
+      .status(duplicateEmailError.statusCode)
+      .send(duplicateEmailError.message);
   }
 
   // getting the token
@@ -24,7 +24,7 @@ module.exports = (req, res, next) => {
   } catch (err) {
     // we return an error if something goes wrong
     return res
-      .status(DuplicateEmailError)
+      .status(DuplicateEmailError.statusCode)
       .send(DuplicateEmailError.message);
   }
 

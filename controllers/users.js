@@ -8,41 +8,39 @@ const { DuplicateEmailError } = require("../utils/errors/DuplicateEmailError");
 const { JWT_SECRET } = require("../utils/config");
 const { handle } = require("express/lib/application");
 
-// create User
-const createUser = (req, res) => {
-  console.log(req);
-  console.log(req.body);
+const createUser = async (req, res) => {
+  try {
+    const { name, avatar, email, password } = req.body;
 
-  const { name, avatar, email, password } = req.body;
-
-  User.findOne({ email }).then((user) => {
-    if (!user) {
-      return Promise.reject(new Error("Incorrect email or password"));
+    // Check if the email already exists
+    const user = await User.findOne({ email });
+    if (user) {
+      const duplicateEmailError = new DuplicateEmailError();
+      return res
+        .status(duplicateEmailError.statusCode)
+        .send(duplicateEmailError.message);
     }
-    const duplicateEmailError = DuplicateEmailError();
-    return res
-      .status(duplicateEmailError.statusCode)
-      .send(duplicateEmailError.message);
-  });
 
-  bcrypt.hash(req.body.password, 10).then((hash) =>
-    User.create({ name, avatar, email, password: hash })
-      .then((item) => {
-        console.log(item);
-        res.send({ data: item });
-      })
-      .catch((e) => {
-        if (e.name && e.name === "ValidationError") {
-          console.log(ValidationError);
-          const validationError = new ValidationError();
-          return res
-            .status(validationError.statusCode)
-            .send(validationError.message);
-        }
-        const serverError = new ServerError();
-        return res.status(serverError.statusCode).send(serverError.message);
-      }),
-  );
+    // Hash the password and create the user
+    const hash = await bcrypt.hash(password, 10);
+    const newUser = await User.create({ name, avatar, email, password: hash });
+
+    console.log(newUser);
+    res.status(201).send({ data: newUser });
+  } catch (error) {
+    console.error(error);
+
+    if (error.name && error.name === "ValidationError") {
+      console.log(ValidationError);
+      const validationError = new ValidationError();
+      return res
+        .status(validationError.statusCode)
+        .send(validationError.message);
+    }
+
+    const serverError = new ServerError();
+    return res.status(serverError.statusCode).send(serverError.message);
+  }
 };
 
 const getCurrentUser = (req, res) => {
@@ -112,7 +110,7 @@ const login = (req, res) => {
     })
     .catch((e) => {
       // otherwise, we get an error
-      const duplicateEmailError = DuplicateEmailError();
+      const duplicateEmailError = new DuplicateEmailError();
       return res
         .status(duplicateEmailError.statusCode)
         .send(duplicateEmailError.message);
