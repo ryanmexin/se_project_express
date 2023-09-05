@@ -91,37 +91,35 @@ const login = (req, res) => {
   const { email, password } = req.body;
 
   User.findUserByCredentials(email, password)
-    .then((user) => {
-      if (email === req.body.email && password === req.body.password) {
-        const token = jwt
-          .sign({ _id: user._id }, JWT_SECRET, {
-            expiresIn: "7d",
-          })
-          .then((user) => {
-            res.status(201).send({ _id: user._id, email: user.email });
-          })
-          .catch((e) => {
-            if (e.name && e.name === "ValidationError") {
-              console.log(ValidationError);
-              const validationError = new ValidationError();
-              return res
-                .status(validationError.statusCode)
-                .send(validationError.message);
-            }
-            const serverError = new ServerError();
-            return res.status(serverError.statusCode).send(serverError.message);
-          });
-      }
-    })
-    .catch((e) => {
-      // otherwise, we get an error
-      console.error(e);
+  .then((user) => {
+    if (email === req.body.email && password === req.body.password) {
+      const token = jwt.sign({ _id: user._id }, JWT_SECRET, {
+        expiresIn: "7d",
+      });
+
+      // Send the token as part of the response
+      res.status(201).send({ _id: user._id, email: user.email, token });
+    }
+  })
+  .catch((e) => {
+    // Handle errors
+    console.error(e);
+    if (e.name && e.name === "ValidationError") {
+      console.log(ValidationError);
+      const validationError = new ValidationError();
+      return res
+        .status(validationError.statusCode)
+        .send(validationError.message);
+    } else {
       const duplicateEmailError = new DuplicateEmailError();
       return res
         .status(duplicateEmailError.statusCode)
         .send(duplicateEmailError.message);
-    });
+    }
+  });
 };
+
+
 
 module.exports = {
   createUser,
