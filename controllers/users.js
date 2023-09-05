@@ -6,6 +6,7 @@ const { CastError } = require("../utils/errors/CastError");
 const { ServerError } = require("../utils/errors/ServerError");
 const { DuplicateEmailError } = require("../utils/errors/DuplicateEmailError");
 const { JWT_SECRET } = require("../utils/config");
+const jwt = require("jsonwebtoken");
 const { handle } = require("express/lib/application");
 
 const createUser = async (req, res) => {
@@ -22,11 +23,15 @@ const createUser = async (req, res) => {
     }
 
     // Hash the password and create the user
-    const hash = await bcrypt.hash(password, 10);
-    const newUser = await User.create({ name, avatar, email, password: hash });
-
-    console.log(newUser);
-    res.status(201).send({ data: newUser });
+    bcrypt
+    .hash(password, 10)
+    .then((hash) =>
+      User.create({ name, avatar, email, password: hash })
+        .then((user) => {
+          const userData = user.toObject();
+          delete userData.password;
+          res.status(200).send({ userData });
+        }))
   } catch (error) {
     console.error(error);
 
@@ -110,6 +115,7 @@ const login = (req, res) => {
     })
     .catch((e) => {
       // otherwise, we get an error
+      console.error(e);
       const duplicateEmailError = new DuplicateEmailError();
       return res
         .status(duplicateEmailError.statusCode)

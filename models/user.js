@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const validator = require("validator");
+const bcrypt = require("bcryptjs");
 
 
 const user = new mongoose.Schema({
@@ -14,7 +15,7 @@ const user = new mongoose.Schema({
     required: true,
     validate: {
       validator: (v) => validator.isURL(v),
-      message: "This is not a Link",
+      message: "You must enter a valid URL",
     },
   },
   email: {

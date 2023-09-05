@@ -10,7 +10,7 @@ module.exports = (req, res, next) => {
   if (!authorization || !authorization.startsWith('Bearer ')) {
     return res
       .status(duplicateEmailError.statusCode)
-      .send(duplicateEmailError.message);
+      .send({ message: "Authorization required" });
   }
 
   // getting the token
