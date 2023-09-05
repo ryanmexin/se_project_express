@@ -23,7 +23,7 @@ const createUser = async (req, res) => {
     }
 
     // Hash the password and create the user
-    bcrypt
+    await bcrypt
     .hash(password, 10)
     .then((hash) =>
       User.create({ name, avatar, email, password: hash })
