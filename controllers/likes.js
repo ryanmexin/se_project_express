@@ -17,22 +17,22 @@ module.exports.likeItem = (req, res) => ClothingItem.findByIdAndUpdate(
     const castError = new CastError();
     return res
       .status(castError.statusCode)
-      .send({ message: castError.message });
+      .send(castError.message );
   } if (e.name && e.name === "ValidationError") {
     const validationError = new ValidationError();
     return res
       .status(validationError.statusCode)
-      .send({ message: validationError.message });
+      .send( validationError.message );
   } if (e.name &&  e.name === "NotFoundError"){
     const notFoundError = new NotFoundError();
     return res
       .status(notFoundError.statusCode)
-      .send({ message: notFoundError.message });
+      .send(notFoundError.message );
   }
   const serverError = new ServerError();
     return res
       .status(serverError.statusCode)
-      .send({ message: serverError.message });
+      .send(serverError.message);
 });
 
 

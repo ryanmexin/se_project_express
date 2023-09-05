@@ -24,8 +24,8 @@ module.exports = (req, res, next) => {
   } catch (err) {
     // we return an error if something goes wrong
     return res
-      .status(DuplicateEmailError.statusCode)
-      .send(DuplicateEmailError.message);
+      .status(DuplicateEmailError.status)
+      .send({ message: "Forbidden Access" });
   }
 
   req.user = payload; // assigning the payload to the request object
