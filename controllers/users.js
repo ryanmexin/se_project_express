@@ -47,17 +47,25 @@ const createUser = async (req, res) => {
      return res.status(serverError.statusCode).send(serverError.message);
    }
 
-   return User();
-
  };
 
 const getCurrentUser = (req, res) => {
   const userId = req.user._id;
   User.findById(userId)
-    .orFail()
+  .orFail(() => new NotFoundError())
     .then((user) => {
       res.status(200).send({ user });
     })
+    .catch((e) => {
+      console.log(e);
+      if (e.name && e.name === "NotFoundError") {
+        const notFoundError = new NotFoundError();
+        return res.status(notFoundError.statusCode).send(notFoundError.message);
+      }
+      if (e.name && e.name === "CastError") {
+        const castError = new CastError();
+        return res.status(castError.statusCode).send(castError.message);
+      }});
 };
 
 const updateCurrentUser = (req, res) => {
@@ -67,8 +75,8 @@ const updateCurrentUser = (req, res) => {
     { name, avatar },
     { new: true, runValidators: true },
   )
-    .orFail()
-    .then(() => res.status(200))
+  .orFail(() => new NotFoundError())
+  .then((user) => res.status(200).send(user))
     .catch((e) => {
       console.log(e);
       if (e.name && e.name === "ValidationError") {

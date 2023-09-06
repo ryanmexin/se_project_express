@@ -48,7 +48,7 @@ user.statics.findUserByCredentials = function findUserByCredentials(
         return Promise.reject(new AuthError("Authentication Failed"));
       }
 
-      if (!user) {
+      if (!x) {
         return Promise.reject(new AuthError("Authentication Failed"));
       }
 
@@ -56,7 +56,7 @@ user.statics.findUserByCredentials = function findUserByCredentials(
         if (!matched) {
           return Promise.reject(new AuthError("Authentication Failed"));
         }
-        return user;
+        return x;
       });
     });
 };

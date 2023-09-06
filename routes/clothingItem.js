@@ -3,19 +3,14 @@ const auth = require("../middlewares/auth");
 
 const { createItem, getItems, deleteItem } = require("../controllers/clothingItem");
 
+// Read
+router.get("/", getItems);
+
 router.use(auth);
-// CRUD
 
 // Create
 
 router.post("/", createItem);
-
-// Read
-router.get("/", getItems);
-
-// Update
-
-
 
 // Delete
 
