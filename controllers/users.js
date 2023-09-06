@@ -46,7 +46,7 @@ const createUser = async (req, res) => {
      const serverError = new ServerError();
      return res.status(serverError.statusCode).send(serverError.message);
    }
-
+   return res.status(500)
  };
 
 const getCurrentUser = (req, res) => {
@@ -54,7 +54,7 @@ const getCurrentUser = (req, res) => {
   User.findById(userId)
   .orFail(() => new NotFoundError())
     .then((user) => {
-      res.status(200).send({ user });
+     res.status(200).send({ user });
     })
     .catch((e) => {
       console.log(e);
@@ -65,7 +65,10 @@ const getCurrentUser = (req, res) => {
       if (e.name && e.name === "CastError") {
         const castError = new CastError();
         return res.status(castError.statusCode).send(castError.message);
-      }});
+      }
+      return res.status(500);
+    });
+
 };
 
 const updateCurrentUser = (req, res) => {
