@@ -1,5 +1,5 @@
 const jwt = require("jsonwebtoken");
-const { JWT_SECRET } = require("../utils/config.js");
+const { JWT_SECRET } = require("../utils/config");
 const { AuthError } = require("../utils/errors/AuthError");
 
 module.exports = (req, res, next) => {
@@ -29,7 +29,8 @@ module.exports = (req, res, next) => {
   }
 
   req.user = payload; // assigning the payload to the request object
-  next();  // sending the request to the next middleware
+   // sending the request to the next middleware
+ return next();
 
 };
 

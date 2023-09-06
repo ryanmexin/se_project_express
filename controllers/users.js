@@ -46,6 +46,9 @@ const createUser = async (req, res) => {
      const serverError = new ServerError();
      return res.status(serverError.statusCode).send(serverError.message);
    }
+
+   return User();
+
  };
 
 const getCurrentUser = (req, res) => {
@@ -65,9 +68,7 @@ const updateCurrentUser = (req, res) => {
     { new: true, runValidators: true },
   )
     .orFail()
-    .then(() => {
-      return res.status(200);
-    })
+    .then(() => res.status(200))
     .catch((e) => {
       console.log(e);
       if (e.name && e.name === "ValidationError") {

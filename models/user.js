@@ -43,7 +43,7 @@ user.statics.findUserByCredentials = function findUserByCredentials(
 ) {
   return this.findOne({ email })
     .select("password")
-    .then((user) => {
+    .then((x) => {
       if (!email || !password) {
         return Promise.reject(new AuthError("Authentication Failed"));
       }
@@ -52,7 +52,7 @@ user.statics.findUserByCredentials = function findUserByCredentials(
         return Promise.reject(new AuthError("Authentication Failed"));
       }
 
-      return bcrypt.compare(password, user.password).then((matched) => {
+      return bcrypt.compare(password, x.password).then((matched) => {
         if (!matched) {
           return Promise.reject(new AuthError("Authentication Failed"));
         }
