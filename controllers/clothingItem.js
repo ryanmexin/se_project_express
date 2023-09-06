@@ -52,41 +52,34 @@ const deleteItem = (req, res) => {
   const { itemId } = req.params;
   console.log(itemId);
 
-ClothingItem.findById(itemId)
-.orFail()
-.then((item) => {    ////Finds the ID and makes sure it matches the clothing Item
-  if (String(item.owner) !== req.user._id) {
-    const forbiddenError = new ForbiddenError();
-    return res
-      .status(forbiddenError.statusCode)
-      .send( forbiddenError.message);
-  }
-
- return ClothingItem.findByIdAndDelete(itemId)
+  ClothingItem.findById(itemId)
   .orFail(() => new NotFoundError())
-  .then(() =>
-    res
-      .status(200)
-      .send({ message: "item deleted" })
-  ).catch((e) => {
+  .then((item) => {
+    // Finds the ID and makes sure it matches the clothing Item
+    if (String(item.owner) !== req.user._id) {
+      const forbiddenError = new ForbiddenError();
+      throw forbiddenError; // Throw the error to be caught by the common catch block
+    }
+
+    return ClothingItem.findByIdAndDelete(itemId)
+      .orFail(() => new NotFoundError())
+      .then(() => res.status(200).send({ message: "item deleted" }));
+  })
+  .catch((e) => {
     if (e.name === "CastError") {
       const castError = new CastError();
-      return res
-        .status(castError.statusCode)
-        .send( castError.message);
-    }
-    if (e.name && e.name === "NotFoundError") {
+      return res.status(castError.statusCode).send(castError.message);
+    } if (e.name === "NotFoundError") {
       const notFoundError = new NotFoundError();
-      return res
-        .status(notFoundError.statusCode)
-        .send( notFoundError.message);
-    }
+      return res.status(notFoundError.statusCode).send(notFoundError.message);
+    } if (e.name === "ForbiddenError") {
+      // Handle ForbiddenError here
+      return res.status(e.statusCode).send(e.message);
+    }  {
       const serverError = new ServerError();
-      return res
-        .status(serverError.statusCode)
-        .send(serverError.message);
+      return res.status(serverError.statusCode).send(serverError.message);
+    }
   });
-});
 }
 
 

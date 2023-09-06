@@ -1,15 +1,15 @@
 const jwt = require("jsonwebtoken");
 const { JWT_SECRET } = require("../utils/config.js");
-const { DuplicateEmailError } = require("../utils/errors/DuplicateEmailError");
+const { AuthError } = require("../utils/errors/AuthError");
 
 module.exports = (req, res, next) => {
   // getting authorization from the header
   const { authorization } = req.headers;
- const duplicateEmailError = new DuplicateEmailError()
+ const authError = new AuthError()
   // let's check the header exists and starts with 'Bearer '
   if (!authorization || !authorization.startsWith('Bearer ')) {
     return res
-      .status(duplicateEmailError.statusCode)
+      .status(authError.statusCode)
       .send({ message: "Authorization required" });
   }
 
@@ -24,7 +24,7 @@ module.exports = (req, res, next) => {
   } catch (err) {
     // we return an error if something goes wrong
     return res
-      .status(DuplicateEmailError.statusCode)
+      .status(AuthError.statusCode)
       .send({ message: "Forbidden Access" });
   }
 

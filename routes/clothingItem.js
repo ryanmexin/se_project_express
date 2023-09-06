@@ -1,8 +1,9 @@
 const router = require("express").Router();
+const auth = require("../middlewares/auth");
 
 const { createItem, getItems, deleteItem } = require("../controllers/clothingItem");
 
-
+router.use(auth);
 // CRUD
 
 // Create
