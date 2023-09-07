@@ -31,7 +31,7 @@ const createUser = async (req, res) => {
      const userData = createdUser.toObject();
      delete userData.password;
 
-     res.status(200).send({ userData });
+    return res.status(200).send({ userData });
    } catch (error) {
      console.error(error);
 
@@ -46,7 +46,7 @@ const createUser = async (req, res) => {
      const serverError = new ServerError();
      return res.status(serverError.statusCode).send(serverError.message);
    }
-   return res.status(500)
+
  };
 
 const getCurrentUser = (req, res) => {
@@ -66,7 +66,8 @@ const getCurrentUser = (req, res) => {
         const castError = new CastError();
         return res.status(castError.statusCode).send(castError.message);
       }
-      return res.status(500);
+      const serverError = new ServerError();
+    return res.status(serverError.statusCode).send(serverError.message);
     });
 
 };
