@@ -76,7 +76,7 @@ const updateCurrentUser = (req, res) => {
   const { name, avatar } = req.body;
   User.findByIdAndUpdate(
     req.user._id,
-    { name, avatar },
+    { name, avatar: avatar||"" },
     { new: true, runValidators: true },
   )
   .orFail(() => new NotFoundError())
