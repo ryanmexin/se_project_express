@@ -3,10 +3,10 @@ const { ValidationError } = require("../utils/errors/ValidationError");
 const { NotFoundError } = require("../utils/errors/NotFoundError");
 const { CastError } = require("../utils/errors/CastError");
 const { ServerError } = require("../utils/errors/ServerError");
-const {ForbiddenError } = require("../utils/errors/Forbidden");
+//const {ForbiddenError } = require("../utils/errors/Forbidden");
 
 
-const NotFoundError = require("../errors/not-found-err");
+
 const BadRequestError = require("../errors/bad-request-error");
 const ForbiddenError = require("../errors/forbidden-error");
 

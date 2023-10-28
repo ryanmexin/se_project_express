@@ -4,15 +4,7 @@ const { NotFoundError } = require("../utils/errors/NotFoundError");
 const { CastError } = require("../utils/errors/CastError");
 const { ServerError } = require("../utils/errors/ServerError");
 
-const {
-  BAD_REQUEST,
-  NOT_FOUND,
-  DEFAULT,
-  NOT_AUTHORIZED,
-  DUPLICATE_EMAIL,
-} = require("../utils/errors");
 
-const NotFoundError = require("../errors/not-found-err");
 const BadRequestError = require("../errors/bad-request-error");
 
 module.exports.likeItem = (req, res, next) => ClothingItem.findByIdAndUpdate(

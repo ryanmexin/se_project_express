@@ -2,22 +2,15 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("../models/user");
 const { ValidationError } = require("../utils/errors/ValidationError");
-const { NotFoundError } = require("../utils/errors/NotFoundError");
 const { CastError } = require("../utils/errors/CastError");
 const { ServerError } = require("../utils/errors/ServerError");
 const { DuplicateEmailError } = require("../utils/errors/DuplicateEmailError");
 const { AuthError} = require("../utils/errors/AuthError");
 const { JWT_SECRET } = require("../utils/config");
 
-const {
-  BAD_REQUEST,
-  NOT_FOUND,
-  DEFAULT,
-  NOT_AUTHORIZED,
-  DUPLICATE_EMAIL,
-} = require("../utils/errors");
 
-const NotFoundError = require("../errors/not-found-err");
+
+const NotFoundError = require("../errors/not-found-error");
 const BadRequestError = require("../errors/bad-request-error");
 const UnauthorizedError = require("../errors/unauthorized-error");
 const ForbiddenError = require("../errors/forbidden-error");
