@@ -5,7 +5,12 @@ const { CastError } = require("../utils/errors/CastError");
 const { ServerError } = require("../utils/errors/ServerError");
 const {ForbiddenError } = require("../utils/errors/Forbidden");
 
-const createItem = (req, res) => {
+
+const NotFoundError = require("../errors/not-found-err");
+const BadRequestError = require("../errors/bad-request-error");
+const ForbiddenError = require("../errors/forbidden-error");
+
+const createItem = (req, res, next) => {
   // console.log(req);
   console.log(req.body);
 
@@ -22,33 +27,25 @@ const createItem = (req, res) => {
     .catch((e) => {
       console.log(e);
       if (e.name === "ValidationError") {
-        const validationError = new ValidationError();
-        return res
-          .status(validationError.statusCode)
-          .send(validationError.message);
+        next(new BadRequestError("Error from createItem"));
+      } else {
+        next(e);
       }
-      const serverError = new ServerError();
-      return res
-        .status(serverError.statusCode)
-        .send(serverError.message);
     });
 };
 
-const getItems = (req, res) => {
+const getItems = (req, res, next) => {
   console.log(req);
   ClothingItem.find({})
     .then((items) => res.status(200).send(items))
     .catch((e) => {
       console.log(e);
-      const serverError = new ServerError();
-      return res
-        .status(serverError.statusCode)
-        .send(serverError.message);
+      next(e);
     });
 };
 
 
-const deleteItem = (req, res) => {
+const deleteItem = (req, res, next) => {
   const { itemId } = req.params;
   console.log(itemId);
 
@@ -66,21 +63,15 @@ const deleteItem = (req, res) => {
       .then(() => res.status(200).send({ message: "item deleted" }));
   })
   .catch((e) => {
-    if (e.name === "CastError") {
-      const castError = new CastError();
-      return res.status(castError.statusCode).send(castError.message);
-    } if (e.name === "NotFoundError") {
-      const notFoundError = new NotFoundError();
-      return res.status(notFoundError.statusCode).send(notFoundError.message);
-    } if (e.name === "ForbiddenError") {
-      // Handle ForbiddenError here
-      return res.status(e.statusCode).send(e.message);
-    }  {
-      const serverError = new ServerError();
-      return res.status(serverError.statusCode).send(serverError.message);
+    if (e.name === "DocumentNotFoundError") {
+      next(new NotFoundError("Error from deleteItem"));
+    } else if (e.name === "CastError") {
+      next(new BadRequestError("Error from deleteIte"));
+    } else {
+      next(e);
     }
   });
-}
+};
 
 
 

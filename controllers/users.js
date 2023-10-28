@@ -9,8 +9,22 @@ const { DuplicateEmailError } = require("../utils/errors/DuplicateEmailError");
 const { AuthError} = require("../utils/errors/AuthError");
 const { JWT_SECRET } = require("../utils/config");
 
+const {
+  BAD_REQUEST,
+  NOT_FOUND,
+  DEFAULT,
+  NOT_AUTHORIZED,
+  DUPLICATE_EMAIL,
+} = require("../utils/errors");
 
-const createUser = async (req, res) => {
+const NotFoundError = require("../errors/not-found-err");
+const BadRequestError = require("../errors/bad-request-error");
+const UnauthorizedError = require("../errors/unauthorized-error");
+const ForbiddenError = require("../errors/forbidden-error");
+const ConflictError = require("../errors/conflict-error");
+
+
+const createUser = async (req, res, next) => {
   try {
     const { name, avatar, email, password } = req.body;
 
@@ -35,21 +49,17 @@ const createUser = async (req, res) => {
    } catch (error) {
      console.error(error);
 
-     if (error.name && error.name === "ValidationError") {
-       console.log(ValidationError);
-       const validationError = new ValidationError();
-       return res
-         .status(validationError.statusCode)
-         .send(validationError.message);
-     }
-
-     const serverError = new ServerError();
-     return res.status(serverError.statusCode).send(serverError.message);
+     console.error(e);
+            if (e.name === "ValidationError") {
+              next(new BadRequestError("Error from createUser"));
+            } else {
+              next(e);
+            }
    }
 
  };
 
-const getCurrentUser = (req, res) => {
+const getCurrentUser = (req, res, next) => {
   const userId = req.user._id;
   User.findById(userId)
   .orFail(() => new NotFoundError())
@@ -57,22 +67,17 @@ const getCurrentUser = (req, res) => {
      res.status(200).send({ user });
     })
     .catch((e) => {
-      console.log(e);
-      if (e.name && e.name === "NotFoundError") {
-        const notFoundError = new NotFoundError();
-        return res.status(notFoundError.statusCode).send(notFoundError.message);
+      if (e.name === "DocumentNotFoundError") {
+        next(new NotFoundError("Error from getUser"));
+      } else if (e.name === "CastError") {
+        next(new BadRequestError("Error from getUser"));
+      } else {
+        next(e);
       }
-      if (e.name && e.name === "CastError") {
-        const castError = new CastError();
-        return res.status(castError.statusCode).send(castError.message);
-      }
-      const serverError = new ServerError();
-    return res.status(serverError.statusCode).send(serverError.message);
     });
-
 };
 
-const updateCurrentUser = (req, res) => {
+const updateCurrentUser = (req, res, next) => {
   const { name, avatar } = req.body;
   User.findByIdAndUpdate(
     req.user._id,
@@ -82,26 +87,17 @@ const updateCurrentUser = (req, res) => {
   .orFail(() => new NotFoundError())
   .then((user) => res.status(200).send(user))
     .catch((e) => {
-      console.log(e);
-      if (e.name && e.name === "ValidationError") {
-        const validationError = new ValidationError();
-        return res.status(validationError.statusCode).send(validationError.message);
+      if (e.name === "DocumentNotFoundError") {
+        next(new NotFoundError("Error from updateUser"));
+      } else if (e.name === "ValidationError") {
+        next(new BadRequestError("Error from updateUser"));
+      } else {
+        next(e);
       }
-      if (e.name && e.name === "CastError") {
-        const castError = new CastError();
-        return res.status(castError.statusCode).send(castError.message);
-      }
-      if (e.name && e.name === "NotFoundError") {
-        console.log("throwing a NotFoundError");
-        const notFoundError = new NotFoundError();
-        return res.status(notFoundError.statusCode).send(notFoundError.message);
-      }
-      const serverError = new ServerError();
-      return res.status(serverError.statusCode).send(serverError.message);
     });
 };
 
-const login = (req, res) => {
+const login = (req, res, next) => {
   const { email, password } = req.body;
 
   User.findUserByCredentials(email, password)
@@ -115,18 +111,7 @@ const login = (req, res) => {
   })
   .catch((e) => {
     // Handle errors
-    console.error(e);
-    if (e.name === "AuthError") {
-      const authError = new AuthError();
-      return res
-        .status(authError.statusCode)
-        .send(authError.message);
-    }  {
-      const serverError = new ServerError();
-      return res
-        .status(serverError.statusCode)
-        .send(serverError.message);
-    }
+    next(new UnauthorizedError("Error from signinUser"));
   });
 };
 

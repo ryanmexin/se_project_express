@@ -4,7 +4,18 @@ const { NotFoundError } = require("../utils/errors/NotFoundError");
 const { CastError } = require("../utils/errors/CastError");
 const { ServerError } = require("../utils/errors/ServerError");
 
-module.exports.likeItem = (req, res) => ClothingItem.findByIdAndUpdate(
+const {
+  BAD_REQUEST,
+  NOT_FOUND,
+  DEFAULT,
+  NOT_AUTHORIZED,
+  DUPLICATE_EMAIL,
+} = require("../utils/errors");
+
+const NotFoundError = require("../errors/not-found-err");
+const BadRequestError = require("../errors/bad-request-error");
+
+module.exports.likeItem = (req, res, next) => ClothingItem.findByIdAndUpdate(
   req.params.itemId,
   { $addToSet: { likes: req.user._id } }, // add _id to the array if it's not there
   { new: true },
@@ -13,30 +24,17 @@ module.exports.likeItem = (req, res) => ClothingItem.findByIdAndUpdate(
 .then((items) => res.status(200).send(items))
 .catch((e) => {
   console.log(e);
-  if (e.name && e.name === "CastError") {
-    const castError = new CastError();
-    return res
-      .status(castError.statusCode)
-      .send(castError.message );
-  } if (e.name && e.name === "ValidationError") {
-    const validationError = new ValidationError();
-    return res
-      .status(validationError.statusCode)
-      .send( validationError.message );
-  } if (e.name &&  e.name === "NotFoundError"){
-    const notFoundError = new NotFoundError();
-    return res
-      .status(notFoundError.statusCode)
-      .send(notFoundError.message );
+  if (e.name === "DocumentNotFoundError") {
+    next(new NotFoundError("Error from likeItem"));
+  } else if (e.name === "CastError") {
+    next(new BadRequestError("Error from likeItem"));
+  } else {
+    next(e);
   }
-  const serverError = new ServerError();
-    return res
-      .status(serverError.statusCode)
-      .send(serverError.message);
 });
 
 
-module.exports.dislikeItem = (req, res) => ClothingItem.findByIdAndUpdate(
+module.exports.dislikeItem = (req, res, next) => ClothingItem.findByIdAndUpdate(
   req.params.itemId,
   { $pull: { likes: req.user._id } }, // remove _id from the array
   { new: true },
@@ -45,25 +43,11 @@ module.exports.dislikeItem = (req, res) => ClothingItem.findByIdAndUpdate(
 .then((items) => res.status(200).send(items))
 .catch((e) => {
   console.log(e);
-  if (e.name && e.name === "CastError") {
-    const castError = new CastError();
-    return res
-      .status(castError.statusCode)
-      .send( castError.message);
+  if (e.name === "DocumentNotFoundError") {
+    next(new NotFoundError("Error from dislikeItem"));
+  } else if (e.name === "CastError") {
+    next(new BadRequestError("Error from dislikeItem"));
+  } else {
+    next(e);
   }
-  if (e.name && e.name === "ValidationError") {
-    const validationError = new ValidationError();
-    return res
-      .status(validationError.statusCode)
-      .send(validationError.message);
-  } if (e.name && e.name === "NotFoundError") {
-    const notFoundError = new NotFoundError();
-    return res
-      .status(notFoundError.statusCode)
-      .send( notFoundError.message );
-  }
-  const serverError = new ServerError();
-    return res
-      .status(serverError.statusCode)
-      .send( serverError.message);
 });

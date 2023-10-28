@@ -1,11 +1,14 @@
 const express = require("express");
 const mongoose = require("mongoose");
+const {errors} = require("celebrate");
 
 const { PORT = 3001 } = process.env;
 const app = express();
 const cors = require("cors");
+const errorHandler = require("./middlewares/error-handler");
 const { login, createUser } = require("./controllers/users");
 const clothingItem = require("./routes/clothingItem");
+const { requestLogger, errorLogger } = require('./middlewares/logger');
 
 
 mongoose.connect(
@@ -18,19 +21,21 @@ mongoose.connect(
 
 const routes = require("./routes");
 
-
+//middleware setups
 app.use(cors());
+app.use(requestLogger);
 app.use(express.json());
 
 
 
-
+// my routes
 app.post('/signin', login);
 app.post('/signup', createUser);
-
-
-
 app.use('/items', clothingItem);
+//error handling
+app.use(errorLogger);
+app.use(errors());
+app.use(errorHandler);
 
 app.use(routes);
 
