@@ -10,10 +10,8 @@ router.use('/users', user)
 
 router.use('/items', like)
 
-router.use((req, res) => {
+router.use((req, res, next) => {
   const notFoundError = new NotFoundError();
-  return res
-    .status(notFoundError.statusCode)
-    .send(notFoundError.message);
+  next(notFoundError);
 });
 module.exports = router;

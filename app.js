@@ -30,7 +30,7 @@ app.get("/crash-test", () => {
 
 const routes = require("./routes");
 
-//middleware setups
+// middleware setups
 app.use(cors());
 app.use(requestLogger);
 app.use(express.json());
@@ -41,12 +41,15 @@ app.use(express.json());
 app.post('/signin', login);
 app.post('/signup', createUser);
 app.use('/items', clothingItem);
-//error handling
+
+app.use(routes);
+
+// error handling
 app.use(errorLogger);
 app.use(errors());
 app.use(errorHandler);
 
-app.use(routes);
+// app.use(routes);
 
 
 

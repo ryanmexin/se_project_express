@@ -1,11 +1,11 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("../models/user");
-const { ValidationError } = require("../utils/errors/ValidationError");
-const { CastError } = require("../utils/errors/CastError");
-const { ServerError } = require("../utils/errors/ServerError");
+// const { ValidationError } = require("../utils/errors/ValidationError");
+// const { CastError } = require("../utils/errors/CastError");
+// const { ServerError } = require("../utils/errors/ServerError");
 const { DuplicateEmailError } = require("../utils/errors/DuplicateEmailError");
-const { AuthError} = require("../utils/errors/AuthError");
+// const { AuthError} = require("../utils/errors/AuthError");
 const { JWT_SECRET } = require("../utils/config");
 
 
@@ -13,8 +13,8 @@ const { JWT_SECRET } = require("../utils/config");
 const NotFoundError = require("../errors/not-found-error");
 const BadRequestError = require("../errors/bad-request-error");
 const UnauthorizedError = require("../errors/unauthorized-error");
-const ForbiddenError = require("../errors/forbidden-error");
-const ConflictError = require("../errors/conflict-error");
+// const ForbiddenError = require("../errors/forbidden-error");
+// const ConflictError = require("../errors/conflict-error");
 
 
 const createUser = async (req, res, next) => {
@@ -24,10 +24,7 @@ const createUser = async (req, res, next) => {
     // Check if the email already exists
     const user = await User.findOne({ email });
     if (user) {
-      const duplicateEmailError = new DuplicateEmailError();
-      return res
-        .status(duplicateEmailError.statusCode)
-        .send(duplicateEmailError.message);
+      throw new DuplicateEmailError();
     }
 
      // Hash the password
@@ -42,15 +39,16 @@ const createUser = async (req, res, next) => {
    } catch (error) {
      console.error(error);
 
-     console.error(e);
-            if (e.name === "ValidationError") {
+     console.error(error);
+            if (error.name === "ValidationError") {
               next(new BadRequestError("Error from createUser"));
             } else {
-              next(e);
+              return next(error);
             }
+            
    }
-
  };
+
 
 const getCurrentUser = (req, res, next) => {
   const userId = req.user._id;
@@ -102,7 +100,7 @@ const login = (req, res, next) => {
       // Send the token as part of the response
       res.status(201).send({ _id: user._id, email: user.email, token });
   })
-  .catch((e) => {
+  .catch(() => {
     // Handle errors
     next(new UnauthorizedError("Error from signinUser"));
   });
