@@ -35,7 +35,7 @@ const createUser = async (req, res, next) => {
      const userData = createdUser.toObject();
      delete userData.password;
 
-    return res.status(200).send({ userData });
+     res.status(200).send({ userData });
    } catch (error) {
      console.error(error);
 
@@ -43,9 +43,9 @@ const createUser = async (req, res, next) => {
             if (error.name === "ValidationError") {
               next(new BadRequestError("Error from createUser"));
             } else {
-              return next(error);
+               next(error);
             }
-            
+
    }
  };
 
