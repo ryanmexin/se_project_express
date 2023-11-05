@@ -1,6 +1,6 @@
 const ClothingItem = require('../models/clothingItem');
 // const { ValidationError } = require("../utils/errors/ValidationError");
-const { NotFoundError } = require("../utils/errors/NotFoundError");
+const { NotFoundError } = require("../errors/not-found-error");
 // const { CastError } = require("../utils/errors/CastError");
 // const { ServerError } = require("../utils/errors/ServerError");
 

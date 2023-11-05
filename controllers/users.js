@@ -4,7 +4,7 @@ const User = require("../models/user");
 // const { ValidationError } = require("../utils/errors/ValidationError");
 // const { CastError } = require("../utils/errors/CastError");
 // const { ServerError } = require("../utils/errors/ServerError");
-const { DuplicateEmailError } = require("../utils/errors/DuplicateEmailError");
+// const { DuplicateEmailError } = require("../utils/errors/DuplicateEmailError");
 // const { AuthError} = require("../utils/errors/AuthError");
 const { JWT_SECRET } = require("../utils/config");
 
@@ -14,7 +14,7 @@ const NotFoundError = require("../errors/not-found-error");
 const BadRequestError = require("../errors/bad-request-error");
 const UnauthorizedError = require("../errors/unauthorized-error");
 // const ForbiddenError = require("../errors/forbidden-error");
-// const ConflictError = require("../errors/conflict-error");
+const {ConflictError} = require("../errors/conflict-error");
 
 
 const createUser = async (req, res, next) => {
@@ -24,7 +24,7 @@ const createUser = async (req, res, next) => {
     // Check if the email already exists
     const user = await User.findOne({ email });
     if (user) {
-      throw new DuplicateEmailError();
+      throw new ConflictError();
     }
 
      // Hash the password

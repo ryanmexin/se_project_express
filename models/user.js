@@ -1,7 +1,8 @@
 const mongoose = require("mongoose");
 const validator = require("validator");
 const bcrypt = require("bcryptjs");
-const {AuthError } = require("../utils/errors/AuthError");
+// const {AuthError } = require("../utils/errors/AuthError");
+const {UnauthorizedError} = require("../errors/unauthorized-error");
 
 
 
@@ -45,16 +46,16 @@ user.statics.findUserByCredentials = function findUserByCredentials(
     .select("password")
     .then((x) => {
       if (!email || !password) {
-        return Promise.reject(new AuthError("Authentication Failed"));
+        return Promise.reject(new UnauthorizedError("Authentication Failed"));
       }
 
       if (!x) {
-        return Promise.reject(new AuthError("Authentication Failed"));
+        return Promise.reject(new UnauthorizedError("Authentication Failed"));
       }
 
       return bcrypt.compare(password, x.password).then((matched) => {
         if (!matched) {
-          return Promise.reject(new AuthError("Authentication Failed"));
+          return Promise.reject(new UnauthorizedError("Authentication Failed"));
         }
         return x;
       });
