@@ -6,7 +6,8 @@ const User = require("../models/user");
 // const { ServerError } = require("../utils/errors/ServerError");
 // const { DuplicateEmailError } = require("../utils/errors/DuplicateEmailError");
 // const { AuthError} = require("../utils/errors/AuthError");
-const { JWT_SECRET } = require("../utils/config");
+// const { JWT_SECRET } = require("../utils/config");
+const SECRET_KEY = require("../utils/config");
 
 
 
@@ -93,7 +94,7 @@ const login = (req, res, next) => {
 
   User.findUserByCredentials(email, password)
   .then((user) => {
-      const token = jwt.sign({ _id: user._id }, JWT_SECRET, {
+      const token = jwt.sign({ _id: user._id }, process.env.SECRET_KEY, {
         expiresIn: "7d",
       });
 
