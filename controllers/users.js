@@ -15,7 +15,7 @@ const NotFoundError = require("../errors/not-found-error");
 const BadRequestError = require("../errors/bad-request-error");
 const UnauthorizedError = require("../errors/unauthorized-error");
 // const ForbiddenError = require("../errors/forbidden-error");
-const {ConflictError} = require("../errors/conflict-error");
+const ConflictError = require("../errors/conflict-error");
 
 
 const createUser = async (req, res, next) => {
