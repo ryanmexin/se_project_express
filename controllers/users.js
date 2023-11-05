@@ -25,7 +25,7 @@ const createUser = async (req, res, next) => {
     // Check if the email already exists
     const user = await User.findOne({ email });
     if (user) {
-      throw new ConflictError();
+      return next(new ConflictError("Email already exist"));
     }
 
      // Hash the password
@@ -54,7 +54,7 @@ const createUser = async (req, res, next) => {
 const getCurrentUser = (req, res, next) => {
   const userId = req.user._id;
   User.findById(userId)
-  .orFail(() => new NotFoundError())
+  .orFail()
     .then((user) => {
      res.status(200).send({ user });
     })
@@ -76,7 +76,7 @@ const updateCurrentUser = (req, res, next) => {
     { name, avatar: avatar||"" },
     { new: true, runValidators: true },
   )
-  .orFail(() => new NotFoundError())
+  .orFail()
   .then((user) => res.status(200).send(user))
     .catch((e) => {
       if (e.name === "DocumentNotFoundError") {
