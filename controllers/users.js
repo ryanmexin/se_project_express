@@ -25,7 +25,7 @@ const createUser = async (req, res, next) => {
     // Check if the email already exists
     const user = await User.findOne({ email });
     if (user) {
-      return next(new ConflictError("Email already exist"));
+       next(new ConflictError("Email already exist"));
     }
 
      // Hash the password
