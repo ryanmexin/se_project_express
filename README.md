@@ -3,7 +3,6 @@ The back-end project is focused on creating a server for the WTWR application. Y
 
 I have used express.js and have gained a better understanding of building the back end of a web application. We used Postman to run tests and MongoDB to check our databases.
 
-The domain for this project is https://wtwr.serverpit.com/
 
 ## Running the Project
 `npm run start` — to launch the server 
